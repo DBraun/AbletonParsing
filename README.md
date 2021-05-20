@@ -25,12 +25,13 @@ import pyrubberband as pyrb
 import soundfile as sf
 
 bpm = 120.
-audio_path = 'input_audio.mp3'
+audio_path = 'input_audio.mp3'  # "input_audio.mp3.asd" must already exist
 
 clip = abletonparsing.Clip(audio_path)
 
 time_map = clip.get_time_map(bpm)
 
+# Time-stretch the audio to the requested bpm.
 output_audio = pyrb.timemap_stretch(clip.audio_data.transpose(), clip.sr, time_map)
 
 with sf.SoundFile('output_audio.wav', 'w', clip.sr, 2, 'PCM_24') as f:
