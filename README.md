@@ -1,5 +1,21 @@
 # AbletonParsing
-Parse an Ableton ASD clip file in Python
+Parse an Ableton ASD clip file in Python.
+
+Clip class:
+* .loop_on - ( bool , READ/WRITE ) - Loop toggle is on
+* .start_marker - ( float , READ/WRITE ) - Start marker in beats relative to 1.1.1
+* .end_marker - ( float , READ/WRITE ) - End marker in beats relative to 1.1.1
+* .loop_start - ( float , READ/WRITE ) - Loop start in beats relative to 1.1.1
+* .loop_end - ( float , READ/WRITE ) - Loop end in beats relative to 1.1.1
+* .hidden_loop_start - ( float , READ/WRITE ) - Hidden loop start in beats relative to 1.1.1
+* .hidden_loop_end - ( float , READ/WRITE ) - Hidden loop end in beats relative to 1.1.1
+* .audio_data - ( np.ndarray , READ/WRITE ) - np.ndarray of music signal shaped [channels, num_samples]
+* .warp_markers - ( list[WarpMarker] , READ/WRITE ) - List of warp markers
+* .sr - ( float , READ/WRITE ) - Sample rate of audio data
+
+WarpMarker class:
+* .seconds - ( float , READ/WRITE ) - Position in seconds in the audio data.
+* .beats - ( float , READ/WRITE ) - Position in "beats" (typically quarter note) relative to 1.1.1
 
 ## Example
 

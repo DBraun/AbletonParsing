@@ -87,11 +87,15 @@ class Clip:
 
     @warp_markers.setter
     def warp_markers(self, warp_markers : List[WarpMarker]):
-        self._warp_markers = value
+        self._warp_markers = warp_markers
 
     @property
     def sr(self):
         return self._sr
+
+    @sr.setter
+    def sr(self, value : int):
+        self._sr = value
 
 
     def __init__(self, audio_path : str, *args, dtype='float64', always_2d=False):
