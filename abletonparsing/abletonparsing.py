@@ -90,6 +90,14 @@ class Clip:
         self._warp_markers = warp_markers
 
     @property
+    def warp_on(self):
+        return self._warp_on
+
+    @warp_on.setter
+    def warp_on(self, warp_on : bool):
+        self._warp_on = warp_on
+
+    @property
     def sr(self):
         return self._sr
 
@@ -115,6 +123,7 @@ class Clip:
         self._hidden_loop_start = 0.
         self._hidden_loop_end = 0.
         self._warp_markers = []
+        self._warp_on = False
         self._audio_data = None
         self._sr = 44100
 
@@ -201,6 +210,8 @@ class Clip:
         self._hidden_loop_start, index = read_double(asd_bin, index)
         self._hidden_loop_end, index = read_double(asd_bin, index)
         self._end_marker, index = read_double(asd_bin, index)
+        index += 3
+        self._warp_on, index = read_bool(asd_bin, index)
 
         self._start_marker = self._loop_start + sample_offset
 

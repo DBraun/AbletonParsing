@@ -11,6 +11,7 @@ Clip class:
 * .hidden_loop_end - ( float , READ/WRITE ) - Hidden loop end in beats relative to 1.1.1
 * .audio_data - ( np.ndarray , READ/WRITE ) - np.ndarray of music signal shaped [channels, num_samples]
 * .warp_markers - ( list[WarpMarker] , READ/WRITE ) - List of warp markers
+* .warp_on - ( bool , READ/WRITE ) - Warping is on
 * .sr - ( float , READ/WRITE ) - Sample rate of audio data
 
 WarpMarker class:
