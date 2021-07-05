@@ -7,13 +7,13 @@ version = imp.load_source('abletonparsing.version', 'abletonparsing/version.py')
 setup(
     name='abletonparsing',
     version=version.version,
-    description='Python module to wrap rubberband',
+    description='Python module for parsing Ableton Live ASD clip files containing warp markers.',
     author='David Braun',
     author_email='braun@ccrma.stanford.edu',
     url='http://github.com/dbraun/abletonparsing',
-    download_url='http://github.com/bmcfee/abletonparsing/releases',
+    download_url='http://github.com/dbraun/abletonparsing/releases',
     packages=find_packages(),
-    long_description="""A python module to parse Ableton ASD files.""",
+    long_description="""Python module for parsing Ableton Live ASD clip files containing warp markers.""",
     classifiers=[
         "License :: MIT License",
         "Programming Language :: Python",
@@ -28,20 +28,20 @@ setup(
     ],
     keywords='audio music sound',
     license='MIT',
-    install_requires=[
-        'librosa>=0.8.0',
-    ],
+    install_requires=[],
     extras_require={
         'docs': ['numpydoc'],
-        # 'tests': [
-        #     'pytest',
-        #     'pytest-cov',
-        #     'contextlib2',
-        # ]
+        'tests': [
+            'pytest',
+            'pyrubberband',
+            'librosa',
+            'soundfile'
+        ]
     },
-    # test_require=[
-    #     'pytest',
-    #     'pytest-cov',
-    #     'contextlib2',
-    # ]
+    test_require=[
+        'pytest',
+        'pyrubberband',
+        'librosa',
+        'soundfile'
+        ]
 )

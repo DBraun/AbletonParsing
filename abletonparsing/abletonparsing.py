@@ -1,5 +1,3 @@
-import librosa
-
 from os.path import isfile
 from struct import unpack
 from typing import List
@@ -11,6 +9,9 @@ class WarpMarker:
 
         self.seconds = seconds
         self.beats = beats
+
+    def __repr__(self):
+        return "WarpMarker(seconds={0},beats={1})".format(self.seconds, self.beats)
 
 
 class Clip:
@@ -74,14 +75,6 @@ class Clip:
         self._hidden_loop_end = value
 
     @property
-    def audio_data(self):
-        return self._audio_data
-
-    @audio_data.setter
-    def audio_data(self, value):
-        self._audio_data = value
-
-    @property
     def warp_markers(self):
         return self._warp_markers
 
@@ -106,13 +99,17 @@ class Clip:
         self._sr = value
 
 
-    def __init__(self, audio_path : str, *args, dtype='float64', always_2d=False):
+    def __init__(self, clip_path: str, sr: int, num_samples: int):
 
         '''
         Parameters
         ----------
-        audio_path : str
-            Path to an audio file.
+        clip_path : str
+            Path to an Ableton ASD file.
+        sr : int
+            Sample rate the of the audio file associated with the ASD clip.
+        num_samples : int
+            Number of audio samples per channel in the audio file associated with the ASD clip.
         '''
 
         self._loop_on = False
@@ -124,14 +121,10 @@ class Clip:
         self._hidden_loop_end = 0.
         self._warp_markers = []
         self._warp_on = False
-        self._audio_data = None
-        self._sr = 44100
+        self._sr = sr
+        self._num_samples = num_samples
 
-        self._audio_data, self._sr = librosa.load(audio_path, sr=None, mono=False)
-
-        asd_path = audio_path + '.asd'
-
-        self._parse_asd_file(asd_path)
+        self._parse_asd_file(clip_path)
 
 
     def get_time_map(self, bpm : float):
@@ -156,8 +149,13 @@ class Clip:
 
         time_map = []
         for wm in self._warp_markers:
-            
-            time_map.append([int(wm.seconds*self._sr), int(wm.beats*(60./bpm)*self._sr)])
+
+            sample_index = int(wm.seconds*self._sr)
+
+            if sample_index <= self._num_samples:
+                time_map.append([sample_index, int(wm.beats*(60./bpm)*self._sr)])
+            else:
+                return time_map
 
         wm1 = self._warp_markers[-2]  # second to last warp marker
         wm2 = self._warp_markers[-1]  # last warp marker
@@ -165,12 +163,10 @@ class Clip:
         # The difference in beats divided by the difference in seconds, times 60 seconds = BPM.
         last_bpm = (wm2.beats - wm1.beats) / (wm2.seconds - wm1.seconds) * 60.
 
-        num_samples = self._audio_data.shape[1] if len(self._audio_data.shape) > 1 else self._audio_data.shape[0]
-
         # Extrapolate the last bpm 
-        mapped_last_sample = int(time_map[-1][1] + (num_samples-time_map[-1][0])*last_bpm/bpm)
+        mapped_last_sample = int(time_map[-1][1] + (self._num_samples-time_map[-1][0])*last_bpm/bpm)
 
-        time_map.append([num_samples, mapped_last_sample])
+        time_map.append([self._num_samples, mapped_last_sample])
 
         return time_map
 
@@ -186,14 +182,16 @@ class Clip:
         '''
 
         if not isfile(filepath):
-            raise FileNotFoundError(f"No such file or directory: '{filepath}'")
+            raise FileNotFoundError(f"No such file: '{filepath}'")
 
         f = open(filepath, 'rb')
         asd_bin = f.read()
         f.close()
 
         index = asd_bin.find(b'SampleOverViewLevel')
+        # Find the second appearance of SampleOverViewLevel
         index = asd_bin.find(b'SampleOverViewLevel', index+1)
+        # Go forward a fixed number of bytes.
         index += 90
 
         def read_double(buffer, index):
@@ -234,6 +232,6 @@ class Clip:
 
             last_good_index = index
 
-        index += 15
+        index += 7
         # The loop_on value can be found some bytes after the last warp marker.
         self._loop_on, index = read_bool(asd_bin, index)
