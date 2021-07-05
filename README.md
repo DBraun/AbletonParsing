@@ -1,6 +1,12 @@
 # AbletonParsing
 Parse an Ableton ASD clip file in Python.
 
+## Install
+
+`pip install abletonparsing`
+
+## API
+
 Clip class:
 * .loop_on - ( bool , READ/WRITE ) - Loop toggle is on
 * .start_marker - ( float , READ/WRITE ) - Start marker in beats relative to 1.1.1
