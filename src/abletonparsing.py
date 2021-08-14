@@ -23,7 +23,7 @@ class Clip:
         return self._loop_on
 
     @loop_on.setter
-    def loop_on(self, value):
+    def loop_on(self, value: bool):
         self._loop_on = value
 
     @property
@@ -87,7 +87,7 @@ class Clip:
         return self._warp_on
 
     @warp_on.setter
-    def warp_on(self, warp_on : bool):
+    def warp_on(self, warp_on: bool):
         self._warp_on = warp_on
 
     @property
@@ -189,10 +189,19 @@ class Clip:
         f.close()
 
         index = asd_bin.find(b'SampleOverViewLevel')
-        # Find the second appearance of SampleOverViewLevel
-        index = asd_bin.find(b'SampleOverViewLevel', index+1)
-        # Go forward a fixed number of bytes.
-        index += 90
+        if index > 0:
+            # Assume the clip file was saved with Ableton Live 10.
+            # Find the second appearance of SampleOverViewLevel
+            index = asd_bin.find(b'SampleOverViewLevel', index+1)
+            # Go forward a fixed number of bytes.
+            index += 90
+        else:
+            # Assume the clip file was saved with Ableton Live 9.
+            index = asd_bin.find(b'SampleData')
+            # Find the second appearance of SampleData
+            index = asd_bin.find(b'SampleData', index+1)
+            # Go forward a fixed number of bytes.
+            index += 2712
 
         def read_double(buffer, index):
             size_double = 8  # a double is 8 bytes

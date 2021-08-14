@@ -1,5 +1,5 @@
 # AbletonParsing
-Parse an Ableton ASD clip file in Python.
+Parse an Ableton ASD clip file and its warp markers in Python. This module has been tested with `.asd` files saved with Ableton 9 and Ableton 10.
 
 ## Install
 
@@ -23,7 +23,7 @@ WarpMarker class:
 * .seconds - ( float , READ/WRITE ) - Position in seconds in the audio data.
 * .beats - ( float , READ/WRITE ) - Position in "beats" (typically quarter note) relative to 1.1.1
 
-Note that if `loop_on` is true, then `hidden_loop_start` will equal the `loop_start`, and the `hidden_loop_end` will equal the `loop_end`. If `loop_on` is false, then `loop_start` will equal the `start_marker`, and `loop_end` will equal the `end_marker`. In both cases, the value of `loop_on` does *not* affect the absolute value of `hidden_loop_start` or `hidden_loop_end`.
+If `loop_on` is false, then `loop_start` will equal the `start_marker`, and `loop_end` will equal the `end_marker`.
 
 ## Example
 
