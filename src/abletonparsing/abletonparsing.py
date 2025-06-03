@@ -190,18 +190,28 @@ class Clip:
 
         index = asd_bin.find(b'SampleOverViewLevel')
         if index > 0:
-            # Assume the clip file was saved with Ableton Live 10.
-            # Find the second appearance of SampleOverViewLevel
+            # Ableton Live 10 or newer. Find the second appearance of
+            # SampleOverViewLevel and then jump forward a fixed offset.
             index = asd_bin.find(b'SampleOverViewLevel', index+1)
-            # Go forward a fixed number of bytes.
-            index += 90
+
+            # Try the Live 10 offset first.
+            index_live10 = index + 90
+            loop_start = unpack('d', asd_bin[index_live10:index_live10+8])[0]
+
+            if abs(loop_start) < 1e-100:
+                # Extremely small values indicate the Live 12 format which uses
+                # a much larger offset from the marker string.
+                index = index + 2671
+                live12 = True
+            else:
+                index = index_live10
+                live12 = False
         else:
-            # Assume the clip file was saved with Ableton Live 9.
+            # Ableton Live 9 format
             index = asd_bin.find(b'SampleData')
-            # Find the second appearance of SampleData
             index = asd_bin.find(b'SampleData', index+1)
-            # Go forward a fixed number of bytes.
             index += 2712
+            live12 = False
 
         def read_double(buffer, index):
             size_double = 8  # a double is 8 bytes
@@ -217,8 +227,15 @@ class Clip:
         self._hidden_loop_start, index = read_double(asd_bin, index)
         self._hidden_loop_end, index = read_double(asd_bin, index)
         self._end_marker, index = read_double(asd_bin, index)
-        index += 3
-        self._warp_on, index = read_bool(asd_bin, index)
+
+        if live12:
+            # Live 12 stores four boolean values after the doubles. The first
+            # corresponds to warp_on.
+            self._warp_on = bool(asd_bin[index])
+            index += 4
+        else:
+            index += 3
+            self._warp_on, index = read_bool(asd_bin, index)
 
         self._start_marker = self._loop_start + sample_offset
 
