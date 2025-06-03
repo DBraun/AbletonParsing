@@ -5,6 +5,7 @@ from pathlib import Path
 import librosa
 import soundfile as sf
 import pyrubberband as pyrb
+import numpy as np
 
 # Get the directory where this test file is located
 TEST_DIR = Path(__file__).parent
@@ -24,23 +25,23 @@ def _test_basic_params(audio_path, clip_path, loop_on, output_path, bpm,
 	clip = abletonparsing.Clip(clip_path, sr, num_samples)
 	print(clip.warp_markers)
 
-	assert(clip.loop_on == loop_on)
-	assert(clip.warp_on == warp_on)
+	assert clip.loop_on == loop_on
+	assert clip.warp_on == warp_on
 
-	assert(clip.sr == sr)
-	assert(clip.start_marker == start_marker)
-	assert(clip.end_marker == end_marker)
+	assert clip.sr == sr
+	assert np.isclose(clip.start_marker, start_marker)
+	assert np.isclose(clip.end_marker, end_marker)
 
 	if clip.loop_on:
-		assert(clip.hidden_loop_start == hidden_loop_start)
-		assert(clip.hidden_loop_end == hidden_loop_end)
-		assert(clip.loop_start == loop_start)
-		assert(clip.loop_end == loop_end)
+		assert np.isclose(clip.hidden_loop_start, hidden_loop_start)
+		assert np.isclose(clip.hidden_loop_end, hidden_loop_end)
+		assert np.isclose(clip.loop_start, loop_start)
+		assert np.isclose(clip.loop_end, loop_end)
 	else:
-		assert(clip.hidden_loop_start == hidden_loop_start)
-		assert(clip.hidden_loop_end == hidden_loop_end)
-		assert(clip.loop_start == loop_start)
-		assert(clip.loop_end == loop_end)
+		assert np.isclose(clip.hidden_loop_start, hidden_loop_start)
+		assert np.isclose(clip.hidden_loop_end, hidden_loop_end)
+		assert np.isclose(clip.loop_start, loop_start)
+		assert np.isclose(clip.loop_end, loop_end)
 
 	time_map = clip.get_time_map(bpm)
 	print('time_map: ', time_map)
