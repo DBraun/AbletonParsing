@@ -1,11 +1,12 @@
 import abletonparsing
 import pytest
 from pathlib import Path
-
-import librosa
-import soundfile as sf
-import pyrubberband as pyrb
 import numpy as np
+
+# Import optional test dependencies with graceful fallback
+librosa = pytest.importorskip("librosa")
+sf = pytest.importorskip("soundfile") 
+pyrb = pytest.importorskip("pyrubberband")
 
 # Get the directory where this test file is located
 TEST_DIR = Path(__file__).parent
