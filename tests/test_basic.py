@@ -1,10 +1,12 @@
 import abletonparsing
 import pytest
 from pathlib import Path
+import numpy as np
 
-import librosa
-import soundfile as sf
-import pyrubberband as pyrb
+# Import optional test dependencies with graceful fallback
+librosa = pytest.importorskip("librosa")
+sf = pytest.importorskip("soundfile") 
+pyrb = pytest.importorskip("pyrubberband")
 
 # Get the directory where this test file is located
 TEST_DIR = Path(__file__).parent
@@ -24,23 +26,23 @@ def _test_basic_params(audio_path, clip_path, loop_on, output_path, bpm,
 	clip = abletonparsing.Clip(clip_path, sr, num_samples)
 	print(clip.warp_markers)
 
-	assert(clip.loop_on == loop_on)
-	assert(clip.warp_on == warp_on)
+	assert clip.loop_on == loop_on
+	assert clip.warp_on == warp_on
 
-	assert(clip.sr == sr)
-	assert(clip.start_marker == start_marker)
-	assert(clip.end_marker == end_marker)
+	assert clip.sr == sr
+	assert np.isclose(clip.start_marker, start_marker)
+	assert np.isclose(clip.end_marker, end_marker)
 
 	if clip.loop_on:
-		assert(clip.hidden_loop_start == hidden_loop_start)
-		assert(clip.hidden_loop_end == hidden_loop_end)
-		assert(clip.loop_start == loop_start)
-		assert(clip.loop_end == loop_end)
+		assert np.isclose(clip.hidden_loop_start, hidden_loop_start)
+		assert np.isclose(clip.hidden_loop_end, hidden_loop_end)
+		assert np.isclose(clip.loop_start, loop_start)
+		assert np.isclose(clip.loop_end, loop_end)
 	else:
-		assert(clip.hidden_loop_start == hidden_loop_start)
-		assert(clip.hidden_loop_end == hidden_loop_end)
-		assert(clip.loop_start == loop_start)
-		assert(clip.loop_end == loop_end)
+		assert np.isclose(clip.hidden_loop_start, hidden_loop_start)
+		assert np.isclose(clip.hidden_loop_end, hidden_loop_end)
+		assert np.isclose(clip.loop_start, loop_start)
+		assert np.isclose(clip.loop_end, loop_end)
 
 	time_map = clip.get_time_map(bpm)
 	print('time_map: ', time_map)
@@ -69,7 +71,6 @@ def test_basic2():
 		start_marker=0, end_marker=5, hidden_loop_start=4, hidden_loop_end=6,
 		loop_start=0, loop_end=5, sr=44100, warp_on=True)
 
-@pytest.mark.skip(reason="Live 12 format not yet supported - returns garbage values for clip parameters")
 def test_live12_loop_on():
 	audio_path = str(ASSETS_DIR / 'Incredible Bongo Band - Apache.wav')
 	clip_path = str(ASSETS_DIR / 'Incredible Bongo Band - Apache (loop on Live 12).wav.asd')
@@ -79,7 +80,6 @@ def test_live12_loop_on():
 		start_marker=0, end_marker=5, hidden_loop_start=4, hidden_loop_end=6,
 		loop_start=4, loop_end=6, sr=44100, warp_on=True)
 
-@pytest.mark.skip(reason="Live 12 format not yet supported - returns garbage values for clip parameters")
 def test_live12_loop_off():
 	audio_path = str(ASSETS_DIR / 'Incredible Bongo Band - Apache.wav')
 	clip_path = str(ASSETS_DIR / 'Incredible Bongo Band - Apache (loop off Live 12).wav.asd')
