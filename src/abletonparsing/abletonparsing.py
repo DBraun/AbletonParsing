@@ -194,18 +194,46 @@ class Clip:
             # SampleOverViewLevel and then jump forward a fixed offset.
             index = asd_bin.find(b'SampleOverViewLevel', index+1)
 
-            # Try the Live 10 offset first.
-            index_live10 = index + 90
-            loop_start = unpack('d', asd_bin[index_live10:index_live10+8])[0]
-
-            if abs(loop_start) < 1e-100:
-                # Extremely small values indicate the Live 12 format which uses
-                # a much larger offset from the marker string.
-                index = index + 2671
-                live12 = True
+            # Try multiple offsets to find the correct data location
+            live12 = False
+            data_index = None
+            
+            # Test offsets in order of likelihood
+            test_offsets = [90, 2671, 2500, 2600, 2700, 2800, 3000]
+            
+            for offset in test_offsets:
+                test_index = index + offset
+                if test_index + 48 <= len(asd_bin):  # Need 48 bytes for 6 doubles
+                    try:
+                        # Try to read the 6-double sequence
+                        test_values = unpack('6d', asd_bin[test_index:test_index+48])
+                        loop_start, loop_end, sample_offset, hidden_loop_start, hidden_loop_end, end_marker = test_values
+                        
+                        # Check if values are reasonable (within expected ranges)
+                        if (abs(loop_start) <= 50 and abs(loop_end) <= 50 and 
+                            abs(sample_offset) <= 50 and abs(hidden_loop_start) <= 50 and 
+                            abs(hidden_loop_end) <= 50 and abs(end_marker) <= 50 and
+                            end_marker > 0):  # end_marker should be positive
+                            
+                            data_index = test_index
+                            live12 = (offset != 90)  # If not the standard Live 10 offset, assume Live 12
+                            break
+                    except:
+                        continue
+            
+            if data_index is None:
+                # Fallback to original logic if dynamic search fails
+                index_live10 = index + 90
+                loop_start = unpack('d', asd_bin[index_live10:index_live10+8])[0]
+                
+                if abs(loop_start) < 1e-100:
+                    index = index + 2671
+                    live12 = True
+                else:
+                    index = index_live10
+                    live12 = False
             else:
-                index = index_live10
-                live12 = False
+                index = data_index
         else:
             # Ableton Live 9 format
             index = asd_bin.find(b'SampleData')
